@@ -1,0 +1,7 @@
+/.idea/*
+/.vscode/*
+.env
+/environment/artifacts/
+/environment/containers/nginx/dist/
+/environment/ssl
+/images

@@ -1,0 +1,44 @@
+version: '3.7'
+services:
+  ruby:
+    image: "${PROJECT_NAME}/ruby:development"
+    container_name: ${PROJECT_NAME}-ruby
+    environment:
+      DB_NAME: "${DB_NAME}"
+      DB_USER: "${DB_USER}"
+      DB_PASSWORD: "${DB_PASSWORD}"
+      DB_PORT: "${DB_PORT}"
+    depends_on:
+      - postgres
+    build: 
+      context: ./
+      dockerfile: ./environment/containers/ruby/Dockerfile
+    volumes:
+      - ./application:/app:cached
+  postgres:
+    image: "${PROJECT_NAME}/postgres:development"
+    container_name: ${PROJECT_NAME}-postgres
+    build: 
+      context: ./
+      dockerfile: ./environment/containers/postgres/Dockerfile
+    environment:
+      POSTGRES_DB: "${DB_NAME}"
+      POSTGRES_USER: "${DB_USER}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+    ports:
+      - "${DB_PORT}:5432"
+  nginx:
+    image: "${PROJECT_NAME}/nginx:development"
+    container_name: ${PROJECT_NAME}-nginx
+    build: 
+      context: ./
+      dockerfile: ./environment/containers/nginx/Dockerfile
+    depends_on:
+      - ruby
+    tty: true
+    ports:
+      - "${HTTP_PORT}:80"
+      - "${HTTPS_PORT}:443"
+    volumes:
+      - ./environment/ssl/:/etc/nginx/ssl:ro
+      - ./environment/artifacts/:/var/log/nginx:cached
